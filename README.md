@@ -23,3 +23,28 @@ Codesys projects for the control systems lab. The tasks simulate various real-wo
    * **Level Control & Inflow Timing:** Calculates fill times based on fixed flow rates (P2 / V1 / V3 = 35 m³/h) to meter exact ratios of GKV and H2O.
    * **Interlock Safety Logic:** Ensures mutually exclusive valve operations (V1 vs. V2, V4 vs. V7, recirculation vs. discharge).
    * **Simulation Integration:** Integrates with `PPS.SimDeicingPlant` using a time-lapse factor (`TLap = 60`) for real-time visualization and testing.
+
+
+ ## **2. Train Crossing (Level Crossing / Bahnübergang)**
+   This module controls an automated level crossing equipped with two half-barriers, traffic signals (yellow/red), and axle counter sensors for train detection, implemented in CODESYS 3.5 SP21 using Function Block Diagram (FBD).
+
+   ### System Functional Overview & Logic
+   The system sequences traffic signaling, clearance delays, barrier control, and train verification:
+
+   * **Activation & Warning Phase:**
+     * Triggered when an approaching train passes over the **Activation Contact (`Einschaltkontakt`)**.
+     * The yellow signal illuminates for **3 seconds**, after which the red light turns on and remains permanently active throughout the crossing sequence.
+   * **Clearance Time (`Räumzeit`) & Barrier Closing:**
+     * A clearance delay of **4 seconds** starts as soon as the red light turns on.
+     * After this clearance time expires, both half-barriers receive the command to close (`Schranke 1 schließen`, `Schranke 2 schließen`).
+   * **Train Passage & Axle Counting:**
+     * Axle counters are located before (**Entry Axle Counter**) and after (**Exit Axle Counter**) the level crossing.
+     * Each passing axle generates short signal pulses (approx. 30 ms).
+   * **Reopening & Release Phase:**
+     * The crossing is cleared and allowed to reopen only when **both axle counters have evaluated an identical number of axles**, with a requirement of **at least 2 axles** detected.
+     * Upon meeting this safety condition, the closing outputs deactivate, the opening outputs (`Schranke 1 öffnen`, `Schranke 2 öffnen`) activate until limit switches confirm open positions, and the red light turns off.
+
+   ### Control Implementation & I/O Mapping
+   * **Language:** Function Block Diagram (FBD).
+   * **Template & Simulation:** Uses the `BUE_Template` starter project containing `BUE_SIM` (barrier simulation and error monitoring) and `TRAIN_SIM` (train pulse generator).
+   * **Hardware Target:** CODESYS Control Win V3.
